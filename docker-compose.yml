@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:6.0
+    container_name: booksy-mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: booksydb
+
+  backend:
+    build: ./backend
+    container_name: booksy-backend
+    restart: always
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/booksydb  # 👈 changed this
+      - PORT=5000
+      - JWT_SECRET=supersecretkey
+
+  frontend:
+    build: ./frontend
+    container_name: booksy-frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data:
